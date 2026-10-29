@@ -1,5 +1,12 @@
 export type TimeSlot = "morning" | "afternoon" | "evening" | "late_night";
 
+export const SLOT_LABELS: Record<TimeSlot, string> = {
+  morning: "아침",
+  afternoon: "오후",
+  evening: "저녁",
+  late_night: "심야/새벽",
+};
+
 // 시간대 구분 (기획안 3-4):
 // 아침 06:00~12:00, 오후 12:00~18:00, 저녁 18:00~24:00, 심야/새벽 00:00~06:00
 export function timeSlotOfHour(hour: number): TimeSlot {

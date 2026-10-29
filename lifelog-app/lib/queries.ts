@@ -2,7 +2,9 @@ import "server-only";
 import { connection } from "next/server";
 import { getAppUser } from "@/lib/auth";
 import { isValidDate, todayIn, weekdayOf } from "@/lib/dates";
+import { GROUP_ORDER, type EmotionType } from "@/lib/emotion";
 import { supabaseAdmin } from "@/lib/supabase";
+import type { TimeSlot } from "@/lib/time-slot";
 
 export type Todo = {
   id: string;
@@ -121,4 +123,88 @@ export async function getDiary(date: string) {
     .eq("date", date)
     .maybeSingle();
   return check<{ content: string } | null>(result, "일기")?.content ?? "";
+}
+
+export type EmotionEntry = {
+  id: string;
+  recorded_at: string;
+  time_slot: TimeSlot;
+  score: number;
+  cause: string | null;
+  typeIds: number[];
+};
+
+type EmotionTypeRow = {
+  id: number;
+  name: string;
+  grp: EmotionType["grp"];
+  sort_order: number;
+  is_custom: boolean;
+  hidden?: boolean;
+};
+
+// 버블 판에는 숨기지 않은 감정만, 기록 목록에는 includeHidden으로 숨긴 감정(지난 기록에 쓰인 것)까지 쓴다.
+export async function getEmotionTypes({ includeHidden = false } = {}) {
+  const db = supabaseAdmin();
+  const select = (columns: string) =>
+    db.from("emotion_types").select(columns).order("sort_order", { ascending: true });
+
+  let result = await select("id, name, grp, sort_order, is_custom, hidden");
+  // 42703: 열이 없음 (0005_emotion_hidden.sql 실행 전). 실행이 끝나면 이 재시도는 지워도 된다.
+  if (result.error?.code === "42703") {
+    result = await select("id, name, grp, sort_order, is_custom");
+  }
+  const rows = check<EmotionTypeRow[]>(
+    result as unknown as { data: EmotionTypeRow[] | null; error: { message: string } | null },
+    "감정 종류",
+  );
+  // 같은 그룹(색)끼리 모아서 보여준다. 직접 추가한 감정은 그 그룹의 맨 뒤에 온다.
+  return rows
+    .filter((r) => includeHidden || !r.hidden)
+    .sort(
+      (a, b) =>
+        GROUP_ORDER.indexOf(a.grp) - GROUP_ORDER.indexOf(b.grp) ||
+        a.sort_order - b.sort_order,
+    )
+    .map<EmotionType>((r) => ({
+      id: r.id,
+      name: r.name,
+      grp: r.grp,
+      isCustom: r.is_custom,
+    }));
+}
+
+type EmotionRow = {
+  id: string;
+  recorded_at: string;
+  time_slot: TimeSlot;
+  score: number;
+  cause?: string | null;
+  emotion_entry_types: { type_id: number }[];
+};
+
+export async function getEmotionEntries(date: string) {
+  const db = supabaseAdmin();
+  const select = (columns: string) =>
+    db
+      .from("emotion_entries")
+      .select(`${columns}, emotion_entry_types(type_id)`)
+      .eq("date", date)
+      .order("recorded_at", { ascending: true });
+
+  const rows = check<EmotionRow[]>(
+    (await select("id, recorded_at, time_slot, score, cause")) as unknown as {
+      data: EmotionRow[] | null;
+      error: { message: string } | null;
+    },
+    "감정 기록",
+  );
+  return rows.map<EmotionEntry>((r) => ({
+    id: r.id,
+    recorded_at: r.recorded_at,
+    time_slot: r.time_slot,
+    score: r.score,
+    cause: r.cause ?? null,
+    typeIds: r.emotion_entry_types.map((t) => t.type_id),
+  }));
 }

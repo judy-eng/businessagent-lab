@@ -9,6 +9,7 @@ const ITEMS = [
   { href: "/todo", label: "Todo" },
   { href: "/routine", label: "루틴" },
   { href: "/schedule", label: "일정" },
+  { href: "/emotion", label: "감정" },
   { href: "/diary", label: "일기" },
 ];
 

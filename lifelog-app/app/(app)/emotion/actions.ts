@@ -35,13 +35,14 @@ export async function addEmotion(score: number, typeIds: number[], cause: string
     if (found.error || found.data.length !== uniqueTypeIds.length) {
       fail("잘못된 감정 종류입니다.");
     }
-    // 삭제해서 숨긴 감정은 새 기록에 쓸 수 없다. (hidden 열이 아직 없으면 숨긴 감정도 없다)
+    // 삭제해서 숨긴 감정은 새 기록에 쓸 수 없다.
     const hidden = await db
       .from("emotion_types")
       .select("id")
       .in("id", uniqueTypeIds)
       .eq("hidden", true);
-    if (!hidden.error && hidden.data.length > 0) fail("삭제된 감정입니다.");
+    if (hidden.error) fail(hidden.error.message);
+    if (hidden.data.length > 0) fail("삭제된 감정입니다.");
   }
   if (typeof cause !== "string" || cause.length > CAUSE_MAX_LENGTH) {
     fail("감정의 원인이 너무 깁니다.");

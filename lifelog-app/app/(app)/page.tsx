@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { logout } from "@/app/login/actions";
 import { ProgressRing } from "@/components/progress-ring";
+import { SearchBar } from "@/components/search-bar";
 import { formatKorean } from "@/lib/dates";
 import {
   getDayMemo,
@@ -62,6 +63,11 @@ async function HomeContent() {
 
   return (
     <>
+      {/* 과거 기록 검색: 감정 이름을 검색하면 그 감정을 고른 날이 나온다 */}
+      <div className="mb-6">
+        <SearchBar />
+      </div>
+
       {/* 이번 주 한 줄 띠 */}
       <WeekBand today={today} marks={marks} groupOf={groupOf} />
 

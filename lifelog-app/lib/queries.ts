@@ -140,7 +140,7 @@ type EmotionTypeRow = {
   grp: EmotionType["grp"];
   sort_order: number;
   is_custom: boolean;
-  hidden?: boolean;
+  hidden: boolean;
 };
 
 // 버블 판에는 숨기지 않은 감정만, 기록 목록에는 includeHidden으로 숨긴 감정(지난 기록에 쓰인 것)까지 쓴다.
@@ -149,13 +149,11 @@ export async function getEmotionTypes({ includeHidden = false } = {}) {
   const select = (columns: string) =>
     db.from("emotion_types").select(columns).order("sort_order", { ascending: true });
 
-  let result = await select("id, name, grp, sort_order, is_custom, hidden");
-  // 42703: 열이 없음 (0005_emotion_hidden.sql 실행 전). 실행이 끝나면 이 재시도는 지워도 된다.
-  if (result.error?.code === "42703") {
-    result = await select("id, name, grp, sort_order, is_custom");
-  }
   const rows = check<EmotionTypeRow[]>(
-    result as unknown as { data: EmotionTypeRow[] | null; error: { message: string } | null },
+    (await select("id, name, grp, sort_order, is_custom, hidden")) as unknown as {
+      data: EmotionTypeRow[] | null;
+      error: { message: string } | null;
+    },
     "감정 종류",
   );
   // 같은 그룹(색)끼리 모아서 보여준다. 직접 추가한 감정은 그 그룹의 맨 뒤에 온다.

@@ -190,6 +190,7 @@
 | diary_entries | 날짜, 내용 |
 | day_memos | 날짜, 한 줄 메모 |
 | weekly_summaries | 주 시작일, AI 요약 결과 |
+| daily_summaries | 날짜, AI 일 단위 요약 결과 |
 | push_subscriptions | 브라우저 알림 구독 정보 |
 
 ---

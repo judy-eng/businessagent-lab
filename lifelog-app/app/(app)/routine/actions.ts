@@ -37,6 +37,7 @@ export async function toggleRoutineLog(routineId: string, date: string, done: bo
     .upsert({ routine_id: routineId, date, done }, { onConflict: "routine_id,date" });
   if (error) fail(error.message);
   revalidatePath("/routine");
+  revalidatePath("/calendar");
 }
 
 // ---- 루틴 정의 ----

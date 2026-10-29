@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 // 개발 2단계용 임시 이동 메뉴. 홈 화면의 탭 배치는 5단계에서 만든다.
 const ITEMS = [
   { href: "/", label: "홈" },
+  { href: "/calendar", label: "캘린더" },
   { href: "/todo", label: "Todo" },
   { href: "/routine", label: "루틴" },
   { href: "/schedule", label: "일정" },

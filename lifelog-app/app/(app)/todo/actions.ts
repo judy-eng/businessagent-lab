@@ -39,6 +39,7 @@ export async function toggleTodo(id: string, done: boolean) {
   const { error } = await supabaseAdmin().from("todos").update({ done }).eq("id", id);
   if (error) fail(error.message);
   revalidatePath("/todo");
+  revalidatePath("/calendar");
 }
 
 export async function renameTodo(id: string, title: string) {

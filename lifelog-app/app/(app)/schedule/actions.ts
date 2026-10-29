@@ -34,6 +34,7 @@ export async function toggleSchedule(id: string, done: boolean) {
   const { error } = await supabaseAdmin().from("schedules").update({ done }).eq("id", id);
   if (error) fail(error.message);
   revalidatePath("/schedule");
+  revalidatePath("/calendar");
 }
 
 export async function deleteSchedule(id: string) {

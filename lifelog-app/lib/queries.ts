@@ -208,3 +208,33 @@ export async function getEmotionEntries(date: string) {
     typeIds: r.emotion_entry_types.map((t) => t.type_id),
   }));
 }
+
+// 캘린더 날짜 칸에 그릴 감정 도형 정보: 날짜별로, 기록한 감정 하나가 도형 하나다.
+// 감정 종류 없이 점수만 기록한 경우에는 점수만 담은 항목(typeId: null)이 하나 생긴다.
+export type DayEmotionMark = { typeId: number | null; score: number };
+
+export async function getEmotionMarks(startDate: string, endDate: string) {
+  const result = await supabaseAdmin()
+    .from("emotion_entries")
+    .select("date, score, recorded_at, emotion_entry_types(type_id)")
+    .gte("date", startDate)
+    .lte("date", endDate)
+    .order("recorded_at", { ascending: true });
+  const rows = check<
+    { date: string; score: number; emotion_entry_types: { type_id: number }[] }[]
+  >(result, "감정 기록");
+
+  const byDate = new Map<string, DayEmotionMark[]>();
+  for (const row of rows) {
+    const marks = byDate.get(row.date) ?? [];
+    if (row.emotion_entry_types.length === 0) {
+      marks.push({ typeId: null, score: row.score });
+    } else {
+      for (const t of row.emotion_entry_types) {
+        marks.push({ typeId: t.type_id, score: row.score });
+      }
+    }
+    byDate.set(row.date, marks);
+  }
+  return byDate;
+}

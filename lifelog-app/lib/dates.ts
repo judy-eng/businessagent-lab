@@ -34,3 +34,47 @@ export function formatKorean(date: string) {
 export function todayIn(timeZone: string, now = new Date()) {
   return localDateAndSlot(now, timeZone).date;
 }
+
+// ---- 캘린더용 ----
+
+export const WEEKDAY_LABELS_MON_FIRST = ["월", "화", "수", "목", "금", "토", "일"] as const;
+
+// 그 날짜가 속한 주의 월요일
+export function mondayOf(date: string) {
+  const offset = (weekdayOf(date) + 6) % 7;
+  return addDays(date, -offset);
+}
+
+export function startOfMonth(date: string) {
+  return `${date.slice(0, 7)}-01`;
+}
+
+export function endOfMonth(date: string) {
+  const d = toUtc(startOfMonth(date));
+  d.setUTCMonth(d.getUTCMonth() + 1, 0);
+  return d.toISOString().slice(0, 10);
+}
+
+// 달을 옮긴다. 도착한 달에 같은 날이 없으면(31일 → 30일 등) 그 달의 마지막 날로 맞춘다.
+export function addMonths(date: string, months: number) {
+  const d = toUtc(startOfMonth(date));
+  d.setUTCMonth(d.getUTCMonth() + months);
+  const first = d.toISOString().slice(0, 10);
+  const day = Math.min(Number(date.slice(8, 10)), Number(endOfMonth(first).slice(8, 10)));
+  return `${first.slice(0, 8)}${String(day).padStart(2, "0")}`;
+}
+
+// 월간 달력에 보이는 날짜들. 월요일부터 시작하는 주 단위(4~6줄)로 채운다.
+export function monthGrid(date: string) {
+  const start = mondayOf(startOfMonth(date));
+  const end = addDays(mondayOf(endOfMonth(date)), 6);
+  const weeks: string[][] = [];
+  for (let cursor = start; cursor <= end; cursor = addDays(cursor, 7)) {
+    weeks.push(Array.from({ length: 7 }, (_, i) => addDays(cursor, i)));
+  }
+  return weeks;
+}
+
+export function monthTitle(date: string) {
+  return `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월`;
+}

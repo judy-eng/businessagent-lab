@@ -2,6 +2,7 @@ import Link from "next/link";
 import { GROUP_COLORS, scoreColor, type EmotionType } from "@/lib/emotion";
 import { formatKorean } from "@/lib/dates";
 import {
+  getDayMemo,
   getDiary,
   getEmotionEntries,
   getRoutineChecklist,
@@ -64,12 +65,13 @@ export async function DayDetail({
   timeZone: string;
   types: EmotionType[];
 }) {
-  const [todos, routines, schedules, emotions, diary] = await Promise.all([
+  const [todos, routines, schedules, emotions, diary, memo] = await Promise.all([
     getTodos(date),
     getRoutineChecklist(date, timeZone),
     getSchedules(date),
     getEmotionEntries(date),
     getDiary(date),
+    getDayMemo(date),
   ]);
   const typeById = new Map(types.map((t) => [t.id, t]));
   const q = `?date=${date}`;
@@ -142,6 +144,10 @@ export async function DayDetail({
               ))}
             </ul>
           )}
+        </Card>
+
+        <Card title="한 줄" href="/memos" tone="bg-emerald-100/50">
+          {memo ? <p className="text-sm leading-relaxed text-zinc-700">{memo}</p> : empty}
         </Card>
 
         <Card title="일기" href={`/diary${q}`} tone="bg-orange-100/60">

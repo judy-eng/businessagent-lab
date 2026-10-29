@@ -40,6 +40,7 @@ export async function toggleTodo(id: string, done: boolean) {
   if (error) fail(error.message);
   revalidatePath("/todo");
   revalidatePath("/calendar");
+  revalidatePath("/");
 }
 
 export async function renameTodo(id: string, title: string) {

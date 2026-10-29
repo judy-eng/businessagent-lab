@@ -3,15 +3,17 @@
 import { useOptimistic, useState, useTransition } from "react";
 import type { ChecklistRoutine } from "@/lib/queries";
 import { toggleRoutineLog } from "./actions";
+import { groupByCategory } from "./options";
 
+// 오늘 체크: 루틴을 카테고리별로 묶어서 보여준다
 export function RoutineChecklist({
   date,
   routines,
-  categoryNames,
+  categories,
 }: {
   date: string;
   routines: ChecklistRoutine[];
-  categoryNames: Record<string, string>;
+  categories: { id: string; name: string }[];
 }) {
   const [items, applyToggle] = useOptimistic(
     routines,
@@ -42,34 +44,46 @@ export function RoutineChecklist({
   }
 
   const doneCount = items.filter((r) => r.done).length;
+  const groups = groupByCategory(items, categories);
+  // 카테고리를 쓰지 않는 경우에는 묶음 제목 없이 한 목록으로 보여준다
+  const showHeadings = groups.length > 1 || groups.some((g) => g.id !== null);
 
   return (
     <>
       <p className="mb-3 text-sm text-zinc-500">
         {doneCount} / {items.length} 완료
       </p>
-      <ul className="space-y-2">
-        {items.map((r) => (
-          <li key={r.id}>
-            <label className="flex cursor-pointer items-center gap-3 rounded-2xl bg-amber-100/70 px-4 py-3">
-              <input
-                type="checkbox"
-                checked={r.done}
-                onChange={(e) => toggle(r.id, e.target.checked)}
-                className="h-5 w-5 shrink-0 accent-amber-600"
-              />
-              <span className={`flex-1 ${r.done ? "text-zinc-400 line-through" : ""}`}>
-                {r.name}
-              </span>
-              {r.category_id && categoryNames[r.category_id] && (
-                <span className="rounded-full border border-amber-700/30 px-2 py-0.5 text-xs text-amber-900">
-                  {categoryNames[r.category_id]}
+      <div className="space-y-5">
+        {groups.map((g) => (
+          <section key={g.id ?? "none"} aria-label={g.name}>
+            {showHeadings && (
+              <h3 className="mb-2 flex items-baseline gap-2 text-sm font-semibold text-amber-900">
+                {g.name}
+                <span className="text-xs font-normal text-zinc-400">
+                  {g.items.filter((r) => r.done).length}/{g.items.length}
                 </span>
-              )}
-            </label>
-          </li>
+              </h3>
+            )}
+            <ul className="space-y-2">
+              {g.items.map((r) => (
+                <li key={r.id}>
+                  <label className="flex cursor-pointer items-center gap-3 rounded-2xl bg-amber-100/70 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={r.done}
+                      onChange={(e) => toggle(r.id, e.target.checked)}
+                      className="h-5 w-5 shrink-0 accent-amber-600"
+                    />
+                    <span className={`flex-1 ${r.done ? "text-zinc-400 line-through" : ""}`}>
+                      {r.name}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </section>
         ))}
-      </ul>
+      </div>
       {error && (
         <p role="alert" className="mt-3 text-sm text-red-600">
           {error}

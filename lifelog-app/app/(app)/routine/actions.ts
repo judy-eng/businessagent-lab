@@ -38,6 +38,7 @@ export async function toggleRoutineLog(routineId: string, date: string, done: bo
   if (error) fail(error.message);
   revalidatePath("/routine");
   revalidatePath("/calendar");
+  revalidatePath("/");
 }
 
 // ---- 루틴 정의 ----

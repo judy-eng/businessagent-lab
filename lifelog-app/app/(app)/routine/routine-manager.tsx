@@ -1,4 +1,5 @@
 import { WEEKDAY_LABELS } from "@/lib/dates";
+import { groupByCategory } from "./options";
 import type { Category, Routine } from "@/lib/queries";
 import {
   createCategory,
@@ -61,11 +62,16 @@ function daysText(days: number[]) {
 export function RoutineManager({
   routines,
   categories,
+  filtered,
 }: {
-  routines: Routine[];
+  routines: Routine[]; // 카테고리 필터가 이미 적용된 목록
   categories: Category[];
+  filtered: boolean; // 카테고리를 골라서 보고 있는지
 }) {
   const categoryName = new Map(categories.map((c) => [c.id, c.name]));
+  const groups = groupByCategory(routines, categories);
+  // 카테고리를 쓰지 않는 경우에는 묶음 제목 없이 한 목록으로 보여준다
+  const showHeadings = groups.length > 1 || groups.some((g) => g.id !== null);
 
   return (
     <div className="space-y-8">
@@ -97,68 +103,82 @@ export function RoutineManager({
       <section>
         <h3 className="mb-3 font-semibold">등록한 루틴</h3>
         {routines.length === 0 ? (
-          <p className="text-sm text-zinc-500">아직 등록한 루틴이 없어요.</p>
+          <p className="text-sm text-zinc-500">
+            {filtered ? "이 카테고리에 등록한 루틴이 없어요." : "아직 등록한 루틴이 없어요."}
+          </p>
         ) : (
-          <ul className="space-y-2">
-            {routines.map((r) => (
-              <li key={r.id} className="rounded-2xl bg-zinc-50 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className={`truncate font-medium ${r.active ? "" : "text-zinc-400"}`}>
-                      {r.name}
-                      {!r.active && <span className="ml-2 text-xs">(중단됨)</span>}
-                    </p>
-                    <p className="mt-0.5 text-xs text-zinc-500">
-                      {daysText(r.repeat_days)}
-                      {r.category_id && categoryName.get(r.category_id)
-                        ? ` · ${categoryName.get(r.category_id)}`
-                        : ""}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 gap-1">
-                    <form action={setRoutineActive}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <input type="hidden" name="active" value={String(!r.active)} />
-                      <button type="submit" className={`${smallButton} bg-zinc-200`}>
-                        {r.active ? "중단" : "다시 시작"}
-                      </button>
-                    </form>
-                    <form action={deleteRoutine}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <button
-                        type="submit"
-                        className={`${smallButton} bg-red-50 text-red-600`}
-                      >
-                        삭제
-                      </button>
-                    </form>
-                  </div>
-                </div>
-                <details className="mt-3">
-                  <summary className="cursor-pointer text-xs text-zinc-500">수정</summary>
-                  <form action={updateRoutine} className="mt-3 space-y-3">
-                    <input type="hidden" name="id" value={r.id} />
-                    <input
-                      name="name"
-                      required
-                      maxLength={100}
-                      defaultValue={r.name}
-                      aria-label="루틴 이름"
-                      className={`${field} w-full`}
-                    />
-                    <CategorySelect categories={categories} value={r.category_id} />
-                    <DayPicker selected={r.repeat_days} />
-                    <button
-                      type="submit"
-                      className="h-10 w-full rounded-xl bg-zinc-900 text-sm font-semibold text-white"
-                    >
-                      저장
-                    </button>
-                  </form>
-                </details>
-              </li>
+          <div className="space-y-6">
+            {groups.map((g) => (
+              <div key={g.id ?? "none"}>
+                {showHeadings && (
+                  <h4 className="mb-2 flex items-baseline gap-2 text-sm font-semibold text-amber-900">
+                    {g.name}
+                    <span className="text-xs font-normal text-zinc-400">{g.items.length}개</span>
+                  </h4>
+                )}
+                <ul className="space-y-2">
+                  {g.items.map((r) => (
+                  <li key={r.id} className="rounded-2xl bg-zinc-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className={`truncate font-medium ${r.active ? "" : "text-zinc-400"}`}>
+                          {r.name}
+                          {!r.active && <span className="ml-2 text-xs">(중단됨)</span>}
+                        </p>
+                        <p className="mt-0.5 text-xs text-zinc-500">
+                          {daysText(r.repeat_days)}
+                          {r.category_id && categoryName.get(r.category_id)
+                            ? ` · ${categoryName.get(r.category_id)}`
+                            : ""}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 gap-1">
+                        <form action={setRoutineActive}>
+                          <input type="hidden" name="id" value={r.id} />
+                          <input type="hidden" name="active" value={String(!r.active)} />
+                          <button type="submit" className={`${smallButton} bg-zinc-200`}>
+                            {r.active ? "중단" : "다시 시작"}
+                          </button>
+                        </form>
+                        <form action={deleteRoutine}>
+                          <input type="hidden" name="id" value={r.id} />
+                          <button
+                            type="submit"
+                            className={`${smallButton} bg-red-50 text-red-600`}
+                          >
+                            삭제
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                    <details className="mt-3">
+                      <summary className="cursor-pointer text-xs text-zinc-500">수정</summary>
+                      <form action={updateRoutine} className="mt-3 space-y-3">
+                        <input type="hidden" name="id" value={r.id} />
+                        <input
+                          name="name"
+                          required
+                          maxLength={100}
+                          defaultValue={r.name}
+                          aria-label="루틴 이름"
+                          className={`${field} w-full`}
+                        />
+                        <CategorySelect categories={categories} value={r.category_id} />
+                        <DayPicker selected={r.repeat_days} />
+                        <button
+                          type="submit"
+                          className="h-10 w-full rounded-xl bg-zinc-900 text-sm font-semibold text-white"
+                        >
+                          저장
+                        </button>
+                      </form>
+                    </details>
+                  </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
         <p className="mt-3 text-xs text-zinc-400">
           삭제하면 그 루틴의 수행 기록도 함께 지워져요. 기록을 남기려면 &lsquo;중단&rsquo;을 쓰세요.

@@ -35,6 +35,7 @@ export async function toggleSchedule(id: string, done: boolean) {
   if (error) fail(error.message);
   revalidatePath("/schedule");
   revalidatePath("/calendar");
+  revalidatePath("/");
 }
 
 export async function deleteSchedule(id: string) {

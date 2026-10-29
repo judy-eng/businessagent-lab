@@ -92,3 +92,56 @@ body {
     inset 0 0 40px rgb(255 255 255 / 0.6),
     0 4px 24px rgb(139 114 156 / 0.12);
 }
+
+/* 홈의 폴더 카드 */
+.folder-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 112px;
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 0 22px 22px 22px;
+  background: linear-gradient(145deg, var(--from), var(--to));
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.06);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.folder-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -13px;
+  width: 42%;
+  height: 26px;
+  border-radius: 14px 14px 0 0;
+  background: var(--from);
+}
+.folder-card::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 8px;
+  width: 36%;
+  height: 5px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.65);
+}
+.folder-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgb(0 0 0 / 0.1);
+}
+.folder-card:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 3px;
+}
+
+/* 열려 있는 홈 폴더 카드 */
+.folder-card[aria-expanded="true"] {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 2px rgb(24 24 27 / 0.7),
+    0 10px 22px rgb(0 0 0 / 0.1);
+}

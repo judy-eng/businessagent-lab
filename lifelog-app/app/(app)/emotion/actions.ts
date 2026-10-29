@@ -77,6 +77,8 @@ export async function addEmotion(score: number, typeIds: number[], cause: string
     }
   }
   revalidatePath("/emotion");
+  revalidatePath("/");
+  revalidatePath("/calendar");
 }
 
 export async function deleteEmotion(formData: FormData) {
@@ -87,6 +89,8 @@ export async function deleteEmotion(formData: FormData) {
   const { error } = await supabaseAdmin().from("emotion_entries").delete().eq("id", id);
   if (error) fail(error.message);
   revalidatePath("/emotion");
+  revalidatePath("/");
+  revalidatePath("/calendar");
 }
 
 export type CreateEmotionState = { ok: true } | { ok: false; error: string };

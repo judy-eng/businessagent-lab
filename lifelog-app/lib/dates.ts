@@ -78,3 +78,13 @@ export function monthGrid(date: string) {
 export function monthTitle(date: string) {
   return `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월`;
 }
+
+// 캘린더에 보이는 날짜 범위(첫 날, 마지막 날). 월간은 달력 칸 전체, 주간은 그 주 월~일.
+export function calendarRange(view: "month" | "week", date: string) {
+  if (view === "month") {
+    const weeks = monthGrid(date);
+    return { first: weeks[0][0], last: weeks[weeks.length - 1][6] };
+  }
+  const first = mondayOf(date);
+  return { first, last: addDays(first, 6) };
+}

@@ -12,6 +12,7 @@ const ITEMS = [
   { href: "/schedule", label: "일정" },
   { href: "/emotion", label: "감정" },
   { href: "/diary", label: "일기" },
+  { href: "/memos", label: "한 줄" },
 ];
 
 export function TopNav() {

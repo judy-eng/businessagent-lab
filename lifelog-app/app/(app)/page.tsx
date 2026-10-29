@@ -1,4 +1,4 @@
-import { logout } from "./login/actions";
+import { logout } from "@/app/login/actions";
 
 // 홈 화면은 개발 5단계에서 만든다. 지금은 비밀번호 보호만 확인하는 임시 화면이다.
 export default function Home() {

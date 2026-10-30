@@ -25,6 +25,7 @@ import { HomeFolders } from "./home/home-folders";
 import { WeekBand } from "./home/week-band";
 import { MemoForm } from "./memo-form";
 import { toggleSchedule } from "./schedule/actions";
+import { SummaryButton } from "./summary/summary-button";
 import { toggleTodo } from "./todo/actions";
 
 // 진행 막대 한 줄
@@ -76,12 +77,14 @@ async function HomeContent() {
 
       {/* 오늘의 요약 카드: 진행률 + 한 줄 요약 + 직접 쓰는 한 줄 메모 */}
       <section className="mt-6 rounded-3xl bg-gradient-to-br from-violet-50 to-sky-50 p-5">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-x-3">
+          <p className="pt-2 text-xs text-zinc-500">{formatKorean(today)} · 오늘 진행률</p>
+          {/* '한줄 요약' 버튼: 한 줄 요약 영역의 오른쪽 끝. 누르면 오늘 숫자로 만든 요약이 나온다 (AI 없이 무료) */}
+          <SummaryButton kind="daily" target={today} placement="inline" />
+        </div>
+        <div className="mt-2 flex items-center gap-4">
           <ProgressRing percent={percent} />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-zinc-500">{formatKorean(today)} · 오늘 진행률</p>
-            <p className="mt-1 text-base font-semibold leading-snug">{summary}</p>
-          </div>
+          <p className="min-w-0 flex-1 text-base font-semibold leading-snug">{summary}</p>
         </div>
         <div className="mt-4 space-y-1.5">
           <Bar label="Todo" {...count(todos)} color="#8B729C" />

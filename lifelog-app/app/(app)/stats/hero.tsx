@@ -9,10 +9,12 @@ export function StatsHero({
   title,
   corner,
   data,
+  action,
 }: {
   title: string; // 기간 이름 (예: "이번 주", "10월")
   corner: string; // 오른쪽 위 작은 글씨 (예: 날짜)
   data: PeriodEmotion;
+  action?: React.ReactNode; // 오른쪽 위에 놓는 버튼 ('요약 보기')
 }) {
   // 기록이 없으면 '감정 없을 때' 배경, 있으면 점수 평균에 맞는 사진 (모든 사진이 밝아서 글씨는 어둡게)
   const empty = data.entries === 0 || data.average === null;
@@ -31,7 +33,10 @@ export function StatsHero({
     >
       <div className="flex items-start justify-between text-[11px] font-medium uppercase tracking-[0.18em]">
         <span>Statistics</span>
-        <span className="tabular-nums">{corner}</span>
+        <span className="flex flex-col items-end gap-2">
+          <span className="tabular-nums">{corner}</span>
+          {action && <span className="relative normal-case tracking-normal">{action}</span>}
+        </span>
       </div>
 
       {empty ? (

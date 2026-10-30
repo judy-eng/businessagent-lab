@@ -10,6 +10,7 @@ import {
 } from "@/lib/dates";
 import { resolveDate } from "@/lib/queries";
 import { getPeriodEmotion, getStats, type StatsRange } from "@/lib/stats";
+import { SummaryButton } from "../summary/summary-button";
 import { StatsHero } from "./hero";
 import { RoutineCard, SlotCard, WeekdayCard } from "./stat-cards";
 
@@ -59,6 +60,11 @@ async function StatsContent({ searchParams }: { searchParams: SearchParams }) {
   const step = period === "day" ? addDays(date, 1) : period === "week" ? addDays(date, 7) : addMonths(date, 1);
   const back = period === "day" ? addDays(date, -1) : period === "week" ? addDays(date, -7) : addMonths(date, -1);
 
+  // '요약 보기': 오늘 보기는 그날의 한줄 요약, 주 보기는 한 주 요약. 월 보기는 지원하지 않는다.
+  // 아직 오지 않은 날(미래)은 요약할 기록이 없으므로 버튼을 보이지 않는다.
+  const summaryKind = period === "day" ? "daily" : period === "week" ? "weekly" : null;
+  const summaryTarget = period === "day" ? date : start;
+  const summaryAllowed = summaryKind !== null && summaryTarget <= today;
   const [data, stats] = await Promise.all([getPeriodEmotion(start, end), getStats(range, today, timeZone)]);
 
   const pill = (active: boolean) =>
@@ -94,9 +100,13 @@ async function StatsContent({ searchParams }: { searchParams: SearchParams }) {
       )}
 
       <div className="mt-4">
-        <StatsHero title={title} corner={period === "day" ? date.replaceAll("-", ".") : `${start.slice(5).replace("-", ".")} – ${end.slice(5).replace("-", ".")}`} data={data} />
+        <StatsHero
+          title={title}
+          corner={period === "day" ? date.replaceAll("-", ".") : `${start.slice(5).replace("-", ".")} – ${end.slice(5).replace("-", ".")}`}
+          data={data}
+          action={summaryAllowed && summaryKind ? <SummaryButton kind={summaryKind} target={summaryTarget} placement="popover" /> : undefined}
+        />
       </div>
-
       {/* 기본 통계: 분석 범위 안의 기록으로 계산한다 */}
       <div className="mt-10 flex items-baseline justify-between">
         <h2 className="text-xl font-bold">분석</h2>

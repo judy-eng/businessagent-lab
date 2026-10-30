@@ -54,6 +54,7 @@ export function HomeFolders({
   todos,
   emotionCount,
   diaryWritten,
+  emotionPrompt,
   onToggleRoutine,
   onToggleSchedule,
   onToggleTodo,
@@ -64,6 +65,7 @@ export function HomeFolders({
   todos: CheckItem[];
   emotionCount: number;
   diaryWritten: boolean;
+  emotionPrompt: boolean;
   onToggleRoutine: (id: string, done: boolean) => Promise<void>;
   onToggleSchedule: (id: string, done: boolean) => Promise<void>;
   onToggleTodo: (id: string, done: boolean) => Promise<void>;
@@ -100,6 +102,18 @@ export function HomeFolders({
 
   return (
     <>
+      {/* 규칙 기반 질문: 오후 7시 이후 오늘 감정 기록이 없으면 감정 폴더 위에 안내한다 */}
+      {emotionPrompt && (
+        <button
+          type="button"
+          onClick={() => setOpen("emotion")}
+          className="mt-2 flex w-full items-center justify-between gap-3 rounded-2xl bg-pink-50 px-4 py-3 text-left text-sm text-pink-900 ring-1 ring-pink-200"
+        >
+          <span>오늘 감정이 기록되지 않았어요. 오늘 기분은 어떠셨나요?</span>
+          <span aria-hidden="true" className="shrink-0 text-xs font-semibold">기록하기 ▾</span>
+        </button>
+      )}
+
       {/* 한 줄: 루틴 / 일정 / 감정 */}
       <div className="mt-2 grid grid-cols-3 gap-3">
         <FolderButton k="routine" title="루틴" info={doneInfo(routines)} open={open} onToggle={toggle} />

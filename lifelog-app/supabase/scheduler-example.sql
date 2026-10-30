@@ -1,0 +1,19 @@
+-- 앱을 인터넷에 올린 뒤(배포 후)에 쓰는 예시입니다. 지금 내 PC에서만 쓸 때는 필요 없습니다.
+-- Supabase의 pg_cron(정해진 시각 실행)과 pg_net(웹 주소 호출)로 1분마다 알림 확인 길을 부릅니다.
+-- <앱 주소>와 <CRON_SECRET 값>을 바꿔서 SQL Editor에서 한 번 실행하세요.
+--
+-- create extension if not exists pg_cron;
+-- create extension if not exists pg_net;
+--
+-- select cron.schedule(
+--   'lifelog-todo-reminder',
+--   '* * * * *',
+--   $$
+--   select net.http_get(
+--     url := 'https://<앱 주소>/api/cron/todo-reminder',
+--     headers := jsonb_build_object('Authorization', 'Bearer <CRON_SECRET 값>')
+--   );
+--   $$
+-- );
+--
+-- 끄려면: select cron.unschedule('lifelog-todo-reminder');

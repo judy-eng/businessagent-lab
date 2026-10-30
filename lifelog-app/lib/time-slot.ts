@@ -33,3 +33,29 @@ export function localDateAndSlot(at: Date, timeZone: string) {
     timeSlot: timeSlotOfHour(Number(get("hour"))),
   };
 }
+
+// 사용자 시간대의 시와 분 (알림 시각 판단에 쓴다)
+export function localHourMinute(at: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(at);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)!.value);
+  return { hour: get("hour"), minute: get("minute") };
+}
+
+// 알림 시각 규칙 (기획안 5번)
+export const EMOTION_PROMPT_FROM_HOUR = 19; // 오후 7시 이후, 오늘 감정 기록이 없으면 질문을 보여준다
+export const CARRYOVER_HOUR = 23;
+export const CARRYOVER_MINUTE = 30; // 오후 11:30 이후부터 자정까지
+
+export function isEmotionPromptTime(at: Date, timeZone: string) {
+  return localHourMinute(at, timeZone).hour >= EMOTION_PROMPT_FROM_HOUR;
+}
+
+export function isCarryoverTime(at: Date, timeZone: string) {
+  const { hour, minute } = localHourMinute(at, timeZone);
+  return hour === CARRYOVER_HOUR && minute >= CARRYOVER_MINUTE;
+}

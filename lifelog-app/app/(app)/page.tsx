@@ -17,6 +17,9 @@ import {
 import { buildSummary } from "@/lib/summary";
 import { addDays, mondayOf } from "@/lib/dates";
 import { toggleRoutineForDate } from "./calendar/actions";
+import { vapidPublicKey } from "@/lib/push";
+import { isEmotionPromptTime } from "@/lib/time-slot";
+import { NotificationSettings } from "./reminder/notification-settings";
 import { addEmotion } from "./emotion/actions";
 import { HomeFolders } from "./home/home-folders";
 import { WeekBand } from "./home/week-band";
@@ -100,11 +103,15 @@ async function HomeContent() {
         todos={todos.map((t) => ({ id: t.id, label: t.title, done: t.done }))}
         emotionCount={emotions.length}
         diaryWritten={!!diary}
+        // 오후 7시 이후, 오늘 감정 기록이 하나도 없을 때만 질문을 보여준다 (기록하면 사라진다)
+        emotionPrompt={emotions.length === 0 && isEmotionPromptTime(new Date(), timeZone)}
         onToggleRoutine={toggleRoutineForDate.bind(null, today)}
         onToggleSchedule={toggleSchedule}
         onToggleTodo={toggleTodo}
         onRecordEmotion={addEmotion}
       />
+
+      <NotificationSettings publicKey={vapidPublicKey()} />
 
       <form action={logout} className="mt-10 text-center">
         <button type="submit" className="text-xs text-zinc-400 underline underline-offset-2">

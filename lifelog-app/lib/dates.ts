@@ -88,3 +88,14 @@ export function calendarRange(view: "month" | "week", date: string) {
   const first = mondayOf(date);
   return { first, last: addDays(first, 6) };
 }
+
+const ORDINALS = ["첫째", "둘째", "셋째", "넷째", "다섯째", "여섯째"];
+
+// 'N월 M째 주'. 월~일로 이어진 한 주가 두 달에 걸칠 때는 그 주의 목요일이 속한 달로 센다.
+// (그 달의 첫 번째 목요일이 있는 주가 첫째 주)
+export function weekOfMonth(date: string) {
+  const thursday = addDays(mondayOf(date), 3);
+  const month = Number(thursday.slice(5, 7));
+  const nth = Math.ceil(Number(thursday.slice(8, 10)) / 7);
+  return { month, nth, text: `${month}월 ${ORDINALS[nth - 1]} 주` };
+}

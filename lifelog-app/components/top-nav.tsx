@@ -13,6 +13,7 @@ const ITEMS = [
   { href: "/emotion", label: "감정" },
   { href: "/diary", label: "일기" },
   { href: "/memos", label: "한 줄" },
+  { href: "/stats", label: "통계" },
   { href: "/search", label: "검색" },
 ];
 

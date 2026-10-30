@@ -367,7 +367,7 @@ export type HabitRow = {
 const STREAK_LOOKBACK_DAYS = 400;
 
 // 수행 기록을 1000개씩 나눠서 모두 가져온다 (한 번에 가져올 수 있는 수에 제한이 있다)
-async function getRoutineLogsBetween(from: string, to: string) {
+export async function getRoutineLogsBetween(from: string, to: string) {
   const db = supabaseAdmin();
   const rows: { routine_id: string; date: string; done: boolean }[] = [];
   for (let offset = 0; ; offset += 1000) {

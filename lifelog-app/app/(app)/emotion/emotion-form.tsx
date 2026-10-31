@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   CUSTOM_EMOTION_NAME_MAX,
   GROUP_COLORS,
@@ -221,6 +221,13 @@ export function EmotionForm({ types }: { types: EmotionType[] }) {
   const [addOpen, setAddOpen] = useState(false);
   const [added, setAdded] = useState(false);
 
+  // 완료 알림은 몇 초 뒤에 저절로 사라진다
+  useEffect(() => {
+    if (!done) return;
+    const timer = window.setTimeout(() => setDone(false), 4000);
+    return () => window.clearTimeout(timer);
+  }, [done]);
+
   function toggle(id: number) {
     setDone(false);
     setSelected((prev) =>
@@ -318,7 +325,16 @@ export function EmotionForm({ types }: { types: EmotionType[] }) {
         </button>
       </div>
 
-      {done && <p role="status" className="mt-3 text-center text-sm text-emerald-600">기록했어요</p>}
+      {done && (
+        <div className="pointer-events-none fixed inset-x-0 top-6 z-50 flex justify-center px-4">
+          <p
+            role="status"
+            className="rounded-2xl bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-xl"
+          >
+            ✓ 감정기록이 완성되었습니다
+          </p>
+        </div>
+      )}
       {error && <p role="alert" className="mt-3 text-center text-sm text-red-600">{error}</p>}
     </section>
   );
